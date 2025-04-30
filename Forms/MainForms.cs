@@ -1,13 +1,7 @@
-using System.Drawing.Printing;
-
 namespace ProductExport
 {
     public partial class MainForms : Form
     {
-        private bool Drag;
-        private int MouseX;
-        private int MouseY;
-
         private const int WM_NCHITTEST = 0x84;
         private const int HTCAPTION = 0x2;
         private const int HTCLIENT = 0x1;
@@ -16,7 +10,6 @@ namespace ProductExport
 
         private const int CS_DROPSHADOW = 0x00020000;
         private const int WM_NCPAINT = 0x0085;
-        private const int WM_ACTIVATEAPP = 0x001C;
 
         [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
 
@@ -52,15 +45,18 @@ namespace ProductExport
                 m_aeroEnabled = CheckeroEnabled();
                 CreateParams cp = base.CreateParams;
                 if (!m_aeroEnabled)
-                    cp.ClassStyle |= CS_DROPSHADOW; return cp;
+                {
+                    cp.ClassStyle |= CS_DROPSHADOW;
+                }
+                return cp;
             }
         }
 
-        private bool CheckeroEnabled()
+        private static bool CheckeroEnabled()
         {
-            if(Environment.OSVersion.Version.Major >= 6)
+            if (Environment.OSVersion.Version.Major >= 6)
             {
-                int enabled = 0; DwmIsCompositionEnabled(ref enabled);
+                int enabled = 0; _ = DwmIsCompositionEnabled(ref enabled);
                 return (enabled == 1);
             }
             return false;
@@ -68,36 +64,40 @@ namespace ProductExport
 
         protected override void WndProc(ref Message m)
         {
-            switch(m.Msg)
+            switch (m.Msg)
             {
                 case WM_NCPAINT:
-                    if(m_aeroEnabled)
+                    if (m_aeroEnabled)
                     {
                         var V = 2;
-                        DwmSetWindowAttribute(this.Handle, 2, ref V, 4);
+                        _ = DwmSetWindowAttribute(this.Handle, 2, ref V, 4);
                         MARGINS margins = new MARGINS()
                         {
                             cxLeftWidth = 0,
                             cxRightWidth = 0,
                             cyTopHeight = 0,
                             cyBottomHeight = 1
-                        }; DwmExtendFrameIntoClientArea(this.Handle, ref margins);
+                        }; _ = DwmExtendFrameIntoClientArea(this.Handle, ref margins);
                     }
                     break;
                 default: break;
             }
             base.WndProc(ref m);
-            if(m.Msg == WM_NCHITTEST && (int)m.Result == HTCLIENT) m.Result = (IntPtr)HTCAPTION;
+            if (m.Msg == WM_NCHITTEST && (int)m.Result == HTCLIENT) m.Result = (IntPtr)HTCAPTION;
         }
-        
+
         public MainForms()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void BtnExit_Click(object sender, EventArgs e)
         {
-
+            var result = MessageBox.Show("Are you sure you want to exit?", "Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
     }
 }
