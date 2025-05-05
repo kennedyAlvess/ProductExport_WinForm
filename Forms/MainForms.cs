@@ -1,102 +1,47 @@
+using ProductExport.Styles;
+
 namespace ProductExport
 {
     public partial class MainForms : Form
     {
-        private const int WM_NCHITTEST = 0x84;
-        private const int HTCAPTION = 0x2;
-        private const int HTCLIENT = 0x1;
-
-        private bool m_aeroEnabled;
-
-        private const int CS_DROPSHADOW = 0x00020000;
-        private const int WM_NCPAINT = 0x0085;
-
-        [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
-
-        public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
-        [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
-
-        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
-        [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
-
-        public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
-        [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
-
-        private static extern IntPtr CreateRoundRectRgn(
-            int nLeftRect,
-            int nTopRect,
-            int nRightRect,
-            int nBottomRect,
-            int nWidthEllipse,
-            int nHeightEllipse);
-
-        public struct MARGINS
-        {
-            public int cxLeftWidth;
-            public int cxRightWidth;
-            public int cyTopHeight;
-            public int cyBottomHeight;
-        }
 
         protected override CreateParams CreateParams
         {
             get
             {
-                m_aeroEnabled = CheckeroEnabled();
-                CreateParams cp = base.CreateParams;
-                if (!m_aeroEnabled)
-                {
-                    cp.ClassStyle |= CS_DROPSHADOW;
-                }
-                return cp;
+                var cp = base.CreateParams;
+                return PageStyle.ApplyDropShadow(cp);
             }
-        }
-
-        private static bool CheckeroEnabled()
-        {
-            if (Environment.OSVersion.Version.Major >= 6)
-            {
-                int enabled = 0; _ = DwmIsCompositionEnabled(ref enabled);
-                return (enabled == 1);
-            }
-            return false;
         }
 
         protected override void WndProc(ref Message m)
         {
-            switch (m.Msg)
-            {
-                case WM_NCPAINT:
-                    if (m_aeroEnabled)
-                    {
-                        var V = 2;
-                        _ = DwmSetWindowAttribute(this.Handle, 2, ref V, 4);
-                        MARGINS margins = new MARGINS()
-                        {
-                            cxLeftWidth = 0,
-                            cxRightWidth = 0,
-                            cyTopHeight = 0,
-                            cyBottomHeight = 1
-                        }; _ = DwmExtendFrameIntoClientArea(this.Handle, ref margins);
-                    }
-                    break;
-                default: break;
-            }
+            PageStyle.HandleWndProc(this, ref m);
             base.WndProc(ref m);
-            if (m.Msg == WM_NCHITTEST && (int)m.Result == HTCLIENT) m.Result = (IntPtr)HTCAPTION;
         }
 
         public MainForms()
         {
             InitializeComponent();
+            PageStyle.ApplyRoundedRegion(this, 10);
         }
 
         private void BtnExit_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Are you sure you want to exit?", "Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
+            Application.Exit();
+        }
+
+        private void MainForms_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing || e.CloseReason == CloseReason.ApplicationExitCall)
             {
-                Application.Exit();
+                var result = MessageBox.Show("Are you sure you want to exit?", "Exit",
+                                             MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                }
             }
         }
     }

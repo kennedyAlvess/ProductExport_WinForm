@@ -35,8 +35,8 @@ namespace ProductExport
             sideBar_Gradient1.Controls.Add(btnExport);
             sideBar_Gradient1.Controls.Add(btnHome);
             sideBar_Gradient1.Dock = DockStyle.Left;
-            sideBar_Gradient1.GradientBottom = Color.FromArgb(179, 36, 130);
-            sideBar_Gradient1.GradientTop = Color.FromArgb(243, 112, 35);
+            sideBar_Gradient1.GradientBottom = Color.FromArgb(64, 64, 64);
+            sideBar_Gradient1.GradientTop = Color.Black;
             sideBar_Gradient1.Location = new Point(0, 0);
             sideBar_Gradient1.Name = "sideBar_Gradient1";
             sideBar_Gradient1.Size = new Size(92, 500);
@@ -102,10 +102,12 @@ namespace ProductExport
             ClientSize = new Size(908, 500);
             Controls.Add(sideBar_Gradient1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            IsMdiContainer = true;
             MaximizeBox = false;
             Name = "MainForms";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "ProductExport";
+            FormClosing += MainForms_FormClosing;
             sideBar_Gradient1.ResumeLayout(false);
             ResumeLayout(false);
 
