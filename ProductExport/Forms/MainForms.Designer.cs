@@ -94,6 +94,7 @@ namespace ProductExport
             btnHome.Text = "Home";
             btnHome.TextAlign = ContentAlignment.BottomCenter;
             btnHome.UseVisualStyleBackColor = false;
+            btnHome.Click += BtnHome_Click;
             // 
             // MainForms
             // 

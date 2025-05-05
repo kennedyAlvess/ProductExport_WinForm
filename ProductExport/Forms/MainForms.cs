@@ -1,10 +1,11 @@
+using ProductExport.Forms;
 using ProductExport.Styles;
 
 namespace ProductExport
 {
     public partial class MainForms : Form
     {
-
+        HomeForms? home;
         protected override CreateParams CreateParams
         {
             get
@@ -43,6 +44,27 @@ namespace ProductExport
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void BtnHome_Click(object sender, EventArgs e)
+        {
+            if(home is not null)
+            {
+                home.WindowState = FormWindowState.Normal;
+                home.BringToFront();
+                home.Activate();
+                return;
+            }
+
+            home = new HomeForms();
+            home.FormClosed += Home_FormClosed;
+            home.MdiParent = this;
+            home.Show();
+        }
+
+        private void Home_FormClosed(object? sender, FormClosedEventArgs e)
+        {
+            home = null;
         }
     }
 }
